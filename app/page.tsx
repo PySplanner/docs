@@ -18,12 +18,12 @@ export default function Home() {
   else if (currentTab === 'docs') Content = DocsTab;
 
   return (
-    <div className="flex flex-col min-h-screen min-w-screen bg-background">
+    <div className="flex flex-col h-screen w-screen bg-background overflow-hidden relative">
       <MenuBar currentTab={currentTab} onTabChange={setCurrentTab} />
-      <div className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full overflow-y-auto relative">
         <Content setCurrentTab={setCurrentTab} />
       </div>
-      <Footer className="w-full mt-auto shrink-0" />
+      <Footer className="w-full bg-background z-50 shrink-0" />
     </div>
   );
 }
