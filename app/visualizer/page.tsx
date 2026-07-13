@@ -1,8 +1,10 @@
+"use client"
+
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { WaypointsIcon, CodeIcon, ArrowRightIcon, XIcon, GripVerticalIcon, PlusIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ReactSortable } from "react-sortablejs";
 import { Button } from "@/components/ui/button"
 import { useScrollbarDetection } from "@/hooks/use-scrollbar-detection"

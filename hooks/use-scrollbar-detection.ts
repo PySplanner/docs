@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useLayoutEffect, useRef } from 'react';
 
 // Yes this is AI generated, but it works and my monkey brain couldn't figure it out.
