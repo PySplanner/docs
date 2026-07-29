@@ -1,5 +1,6 @@
+import { Toaster } from "@/components/ui/sonner"
 import { Instrument_Sans } from 'next/font/google';
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "next-themes"
 import "./globals.css"
 
 const instrumentSans = Instrument_Sans({
@@ -11,7 +12,10 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
   return (
     <html lang="en" suppressHydrationWarning className={instrumentSans.className}>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider attribute="class" forcedTheme="dark">
+          {children}
+          <Toaster richColors position="bottom-right" />
+        </ThemeProvider>
       </body>
     </html>
   )

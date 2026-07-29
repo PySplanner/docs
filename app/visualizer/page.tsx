@@ -7,6 +7,7 @@ import { WaypointsIcon, CodeIcon, ArrowRightIcon, XIcon, GripVerticalIcon, PlusI
 import { useState, useRef, useCallback, useEffect } from "react"
 import { ReactSortable } from "react-sortablejs";
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 interface PathPoint {
     id: string;
@@ -163,6 +164,11 @@ export default function Visualizer() {
     };
 
     const createSplan = () => {
+        if (splans.length >= 50) {
+            toast.error("Maximum number of splans reached (50).");
+            return;
+        }
+
         const newSplan: Splan = {
             id: (Date.now()).toString(),
             name: `Splan ${splans.length + 1}`,
