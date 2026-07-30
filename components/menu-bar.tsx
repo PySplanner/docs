@@ -1,15 +1,15 @@
 'use client';
 
+import { useRouter, usePathname } from 'next/navigation';
+
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DiscordSVG, GithubSVG } from "@/components/media-icons";
 import { Separator } from "@/components/ui/separator";
 
-interface MenuBarProps {
-  currentTab: string;
-  onTabChange: (tab: string) => void;
-}
+export function MenuBar() {
+  const router = useRouter();
+  const path = usePathname().split('/')[1] || ''; // Default to home if no path is present
 
-export function MenuBar({ currentTab, onTabChange }: MenuBarProps) {
   return (
     <div className="sticky top-0 z-50 w-full h-16 border-b flex items-center justify-between px-6 bg-background/75 shrink-0 backdrop-blur-md">
         <div className="flex flex-1 items-center gap-3 font-bold text-lg">
@@ -17,9 +17,9 @@ export function MenuBar({ currentTab, onTabChange }: MenuBarProps) {
             <span className="text-primary">PySplanner</span>
         </div>
 
-      <Tabs value={currentTab} onValueChange={onTabChange}>
+      <Tabs value={path} onValueChange={(tab) => router.push(`/${tab}`)}>
         <TabsList variant="line">
-            <TabsTrigger value="home">Home</TabsTrigger>
+            <TabsTrigger value="">Home</TabsTrigger>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="visualizer">Visualizer</TabsTrigger>
             <TabsTrigger value="docs">Docs</TabsTrigger>
