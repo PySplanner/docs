@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner"
 import { Instrument_Sans } from 'next/font/google';
 import { ThemeProvider } from "next-themes"
+import { usePathname } from 'next/navigation';
 import "./globals.css"
 
 import { Footer } from '@/components/footer';
@@ -12,6 +13,8 @@ const instrumentSans = Instrument_Sans({
 });
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
+  const path = usePathname().split('/')[1] || ''; // Default to home if no path is present
+  
   return (
     <html lang="en" suppressHydrationWarning className={instrumentSans.className}>
       <body>
