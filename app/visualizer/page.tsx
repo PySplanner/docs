@@ -32,44 +32,7 @@ interface Splan {
 }
 
 export default function Visualizer() {
-    const [splans, setSplans] = useState<Splan[]>([
-        {
-            id: "0",
-            name: "Splan 1",
-            pathPoints: [
-              { id: "0", name: "Point 1", x: 0, y: 0, heading: 0 }, 
-              { id: "1", name: "Point 67", x: 20, y: 67, heading: 45 }
-            ],
-            actionPoints: [
-              { id: "0", name: "Smth smth action", t: 0.2, action: "some_function" },
-              { id: "1", name: "Raise Arm", t: 0.8, action: "raise_arm" }
-            ]
-        },
-        {
-            id: "1",
-            name: "Splan 2",
-            pathPoints: [
-              { id: "0", name: "Point 1234", x: 0, y: 0, heading: 0 }, 
-              { id: "2", name: "Point 4321", x: 67, y: 15, heading: 90 }
-            ],
-            actionPoints: [
-              { id: "0", name: "Action 67", t: 0.2, action: "some_function" },
-              { id: "1", name: "Lower Arm", t: 0.8, action: "lower_arm" }
-            ]
-        },
-        {
-            id: "3",
-            name: "Splan 3",
-            pathPoints: [
-              { id: "0", name: "Point 1234", x: 0, y: 0, heading: 0 }, 
-              { id: "1", name: "Point 4321", x: 67, y: 15, heading: 90 }
-            ],
-            actionPoints: [
-              { id: "0", name: "Action 67", t: 0.2, action: "some_function" },
-              { id: "1", name: "Lower Arm", t: 0.8, action: "lower_arm" }
-            ]
-        }
-    ]);
+    const [splans, setSplans] = useState<Splan[]>([]);
     
     const [selectedSplanId, setSelectedSplanId] = useState("0"); // TODO: Make this -1 when hardcodes are removed
     const [selectedPointId, setSelectedPointId] = useState("-1");
@@ -81,6 +44,16 @@ export default function Visualizer() {
     const trackRef = useRef<HTMLDivElement>(null);
     const [showLeft, setShowLeft] = useState(false);
     const [showRight, setShowRight] = useState(false);
+
+    const [zoom, setZoom] = useState(1);
+    const [pan, setPan] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStartRef = useRef({ x: 0, y: 0 });
+    const fieldContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        createSplan(); // Create an initial splan on mount
+    }, []);
 
     const updateArrows = useCallback(() => {
         if (!trackRef.current) return;
@@ -121,6 +94,66 @@ export default function Visualizer() {
 
     const scrollLeft = () => trackRef.current?.scrollBy({ left: -160, behavior: 'smooth' });
     const scrollRight = () => trackRef.current?.scrollBy({ left: 160, behavior: 'smooth' });
+
+    const handleFieldZoom = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+        e.preventDefault();
+
+        setZoom((prevZoom) => {
+            const zoomFactor = -e.deltaY * 0.001;
+            const nextZoom = Math.min(Math.max(prevZoom + zoomFactor, 0.5), 4);
+
+            // Re-clamp existing pan position to fit the new zoom level
+            setPan((prevPan) => clampPan(prevPan, nextZoom));
+
+            return nextZoom;
+        });
+    }, []);
+
+    const clampPan = useCallback((newPan: { x: number; y: number }, currentZoom: number) => {
+        if (!fieldContainerRef.current) return newPan;
+
+        const { clientWidth, clientHeight } = fieldContainerRef.current;
+
+        // Calculate maximum distance the image can travel in either direction
+        // When zoom <= 1, pan is restricted to the padding allowance
+        const maxPanX = Math.max(0, (clientWidth * (currentZoom - 1)) / 2) + (currentZoom > 1 ? 200 : 0);
+        const maxPanY = Math.max(0, (clientHeight * (currentZoom - 1)) / 2) + (currentZoom > 1 ? 200 : 0);
+
+        return {
+            x: Math.min(Math.max(newPan.x, -maxPanX), maxPanX),
+            y: Math.min(Math.max(newPan.y, -maxPanY), maxPanY),
+        };
+    }, []);
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.button !== 0) return; // Only trigger on left-click (button 0)
+        
+        setIsDragging(true);
+        dragStartRef.current = {
+            x: e.clientX - pan.x,
+            y: e.clientY - pan.y,
+        };
+    };
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!isDragging) return;
+
+        const unclampedPan = {
+            x: e.clientX - dragStartRef.current.x,
+            y: e.clientY - dragStartRef.current.y,
+        };
+
+        setPan(clampPan(unclampedPan, zoom));
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleResetView = () => {
+        setZoom(1);
+        setPan({ x: 0, y: 0 });
+    };
     
     const handleSetPathPoints = (newPathPoints: PathPoint[]) => {
         if (selectedSplanId === "-1") return;
@@ -155,6 +188,11 @@ export default function Visualizer() {
     }
 
     const deleteSplan = (splanId: string) => {
+        if (splans.length <= 1) {
+            toast.error("Cannot delete the last splan.", { description: "To start fresh, create a new splan and delete the old one." });
+            return;
+        }
+
         const newSplans = splans.filter(splan => splan.id !== splanId);
         if (selectedSplanId === splanId) {
             setSelectedSplanId(newSplans.length > 0 ? newSplans[0].id : "-1");
@@ -164,8 +202,8 @@ export default function Visualizer() {
     };
 
     const createSplan = () => {
-        if (splans.length >= 50) {
-            toast.error("Maximum number of splans reached (50).");
+        if (splans.length >= 20) {
+            toast.error("Maximum number of splans reached (20).");
             return;
         }
 
@@ -291,8 +329,32 @@ export default function Visualizer() {
                     </button>
                 </div>
 
-                <div className="flex flex-1 p-4">
-                    stuff
+                <div 
+                    ref={fieldContainerRef} onWheel={handleFieldZoom} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+                    className={`flex flex-1 items-center justify-center overflow-hidden relative select-none ${
+                        isDragging ? 'cursor-grabbing' : 'cursor-grab'
+                    }`}
+                >
+                    <img 
+                        src="/unearthedWireframeField.png"
+                        alt="FLL Mat" 
+                        style={{ 
+                            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                            // Disable smooth transition while dragging so movement feels instant/
+                            transition: isDragging ? 'none' : 'transform 75ms ease-out'
+                        }}
+                        className="object-contain max-w-full max-h-full origin-center pointer-events-none" 
+                    />
+                    
+                    {(zoom !== 1 || pan.x !== 0 || pan.y !== 0) && (
+                        <button 
+                            onClick={handleResetView} 
+                            className="absolute bottom-4 right-4 z-10 bg-background/80 hover:bg-background text-xs px-2.5 py-1.5 rounded border shadow transition-colors cursor-pointer"
+                        >
+                            Reset View ({Math.round(zoom * 100)}%)
+                        </button>
+                    )}
                 </div>
             </ResizablePanel>
         </ResizablePanelGroup>
