@@ -143,9 +143,7 @@ export default function Home() {
 
               <div className="flex items-center gap-4 mt-8">
                 <Button className="text-white" size="lg" onClick={() => router.push('/docs')}>Get Started</Button>
-                <a href="planner.pysplanner.com" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="lg">Go To Planner</Button>
-                </a>
+                <Button variant="outline" size="lg" onClick={() => window.open("https://planner.pysplanner.com/", '_blank')}>Go To Planner</Button>
             </div>
 
             <div className={`absolute bottom-24 flex flex-col items-center gap-1 text-muted-foreground text-sm transition-opacity duration-300 ${isScrollIndicatorVisible ? 'opacity-100' : 'opacity-0'}`}>
