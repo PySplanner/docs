@@ -115,15 +115,17 @@ const socialLinks: SocialProps[] = [
 
 export default function Home() {
   const router = useRouter();
-  const [isScrollIndicatorVisible, setScrollIndicator] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isScrollIndicatorVisible, setScrollIndicatorVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      setScrollIndicator(target.scrollTop < 50);
+    const handleScroll = () => {
+      setScrollIndicatorVisible(window.scrollY < 50);
     };
 
-    window.addEventListener('scroll', handleScroll, true);
+    handleScroll();
+    setIsMounted(true);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll, true);
   }, []);
   
@@ -133,9 +135,9 @@ export default function Home() {
             <div className="absolute top-0 left-0 right-0 h-[60vh] bg-linear-to-b from-primary/11 dark:from-primary/6 to-transparent pointer-events-none" />
 
             <img className="rounded-md mt-12 mb-12 h-50" src="./banner.svg" alt="PySplanner Logo" />
-            <div className="w-3/8 text-center">
+            <div className="w-full text-center">
                 <TypedHeading />
-                <p className="text-lg text-muted-foreground mt-4">
+                <p className="mx-auto w-3/8 text-lg text-muted-foreground mt-4">
                   PySplanner is a powerful, free, and open source tool for optimized autonomous movement on LEGO MINDSTORMS EV3 and SPIKE Prime robots.
                   Creating smooth and consistent movements for your robot has never been easier. Say goodbye to guesswork and hello to precision with PySplanner.
                 </p>
@@ -148,10 +150,11 @@ export default function Home() {
                 </a>
             </div>
 
-            <div className={`absolute bottom-24 flex flex-col items-center gap-1 text-muted-foreground text-sm transition-opacity duration-300 ${isScrollIndicatorVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <ArrowDown />
-                View More
-            </div>
+            {isMounted && (
+              <div className={`absolute bottom-8 flex flex-col items-center gap-1 text-muted-foreground text-sm transition-opacity duration-300 ${isScrollIndicatorVisible ? 'opacity-100' : 'opacity-0'}`}>
+                <ArrowDown />View More
+              </div>
+            )}
         </div>
 
         <div className="flex flex-col w-full max-w-4xl">
@@ -198,31 +201,41 @@ export default function Home() {
 }
 
 function TypedHeading() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <h2 className="font-bold text-4xl tracking-tight">
       LEGO robot movement,&nbsp;
-      <TypeIt
-        options={{
-          speed: 70,
-          deleteSpeed: 50,
-          waitUntilVisible: true,
-          loop: true,
-        }}
-        getBeforeInit={(instance) =>
-          instance
-            .type("simplified.").pause(1500).delete()
-            .type("made for FLL.").pause(1500).delete()
-            .type("free and open source, always.").pause(1500).delete()
-            .type("crazy easy.").pause(1500).delete()
-            .type("that doesn't suck.").pause(1500).delete()
-            .type("that's repeatable.").pause(1500).delete()
-            .type("built different.").pause(1500).delete()
-            .type("that's precise.").pause(1500).delete()
-            .type("revolutionized.").pause(1500).delete()
-            .type("that's optimized.").pause(1500).delete()
-            .type("with no guesswork.").pause(1500).delete()
-        }
-      />
+      {isMounted ? (
+        <TypeIt
+          options={{
+            speed: 70,
+            deleteSpeed: 50,
+            waitUntilVisible: true,
+            loop: true,
+          }}
+          getBeforeInit={(instance) =>
+            instance
+              .type("simplified.").pause(1500).delete()
+              .type("made for FLL.").pause(1500).delete()
+              .type("free and open source, always.").pause(1500).delete()
+              .type("crazy easy.").pause(1500).delete()
+              .type("that doesn't suck.").pause(1500).delete()
+              .type("that's repeatable.").pause(1500).delete()
+              .type("built different.").pause(1500).delete()
+              .type("that's precise.").pause(1500).delete()
+              .type("revolutionized.").pause(1500).delete()
+              .type("that's optimized.").pause(1500).delete()
+              .type("with no guesswork.").pause(1500).delete()
+          }
+        />
+      ) : (
+        <span>simplified.</span>
+      )}
     </h2>
   );
 }

@@ -13,14 +13,10 @@ const instrumentSans = Instrument_Sans({
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
   return (
     <html lang="en" suppressHydrationWarning className={instrumentSans.className}>
-      <body>
+      <body className="flex-1 flex flex-col h-screen w-screen overflow-y-auto relative">
         <ThemeProvider attribute="class" forcedTheme="dark">
-          <div className="flex flex-col h-screen w-screen bg-background overflow-hidden relative">
-            <div className="flex-1 flex flex-col w-full overflow-y-auto relative">
-              {children}
-            </div>
-            <Footer className="w-full bg-background z-50 shrink-0" />
-          </div>
+          {children}
+          <Footer className="w-full bg-background z-50 shrink-0" />
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>
